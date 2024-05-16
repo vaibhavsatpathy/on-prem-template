@@ -1,0 +1,40 @@
+version: '3.3'
+services:
+  base_template_server_core:
+    build: core/.
+    image: base_template/core:latest
+    container_name: base_template_core
+    environment:
+      - secret='b9c8e5acc65e88f817ec58d94b9664cba1385a77a1a63c1e8fa8cd5e5c5852c2'
+      - algorithm=HS256
+      - password=P@ssw0rd
+      - db_url=postgresql://postgres:postgres@base_template_db:5432/postgres
+    volumes:
+      - ./core:/app
+      - ./logs:/app/logs
+      - ./models:/app/models
+    ports:
+      - 8080:8080
+    depends_on:
+      - base_template_db
+    networks:
+      - base_template_server
+    restart: "on-failure"
+
+  base_template_db:
+    image: ankane/pgvector
+    container_name: postgres-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./db/postgres/postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - base_template_server
+    restart: "on-failure"
+
+networks:
+  base_template_server:
+    name: base_template_server-network
